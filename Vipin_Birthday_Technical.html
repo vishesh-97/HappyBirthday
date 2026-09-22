@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VΞR: VIPIN // Birthday Protocol</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#050807;color:#d9ffe7}
+body{overflow-x:hidden}
+canvas{position:fixed;inset:0;z-index:0;opacity:.38}
+.scan{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(#ffffff00 50%,#00ff7510 51%);background-size:100% 4px;mix-blend-mode:screen}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:25px}
+.shell{width:min(900px,100%);border:1px solid #1cff78;border-radius:14px;background:#06100bd9;box-shadow:0 0 0 1px #0b4727,0 0 60px #00ff7420, inset 0 0 50px #00ff7407;overflow:hidden}
+.top{height:42px;border-bottom:1px solid #124d2c;display:flex;align-items:center;padding:0 15px;gap:8px;background:#09150e}
+.dot{width:11px;height:11px;border-radius:50%}.red{background:#ff5f57}.yellow{background:#ffbd2e}.green{background:#28c840}
+.titlebar{margin-left:10px;color:#7da98c;font-size:12px}
+.content{padding:clamp(22px,5vw,48px)}
+.boot{color:#75ffac;font-size:13px;line-height:1.75;min-height:155px}
+.cursor{display:inline-block;width:8px;height:16px;background:#1cff78;vertical-align:middle;animation:blink .8s infinite}
+@keyframes blink{50%{opacity:0}}
+.hero{display:none;text-align:center}
+.badge{display:inline-block;border:1px solid #1cff78;color:#1cff78;border-radius:999px;padding:7px 13px;font-size:11px;letter-spacing:2px}
+h1{font-family:Inter,system-ui,sans-serif;font-size:clamp(43px,9vw,88px);line-height:.95;margin:20px 0 10px;letter-spacing:-3px;background:linear-gradient(90deg,#fff,#77ffad,#b7ffd3,#fff);-webkit-background-clip:text;color:transparent}
+.sub{color:#8bb99b;font-size:14px}
+.terminal{margin:30px auto 0;text-align:left;border:1px solid #164f2d;border-radius:10px;background:#020604;padding:18px;max-width:700px;box-shadow:inset 0 0 30px #00ff7408}
+.line{margin:8px 0;color:#a9d8b8}.prompt{color:#1cff78}.key{color:#8eeaff}.val{color:#ffe68a}
+#message{white-space:pre-line;line-height:1.75;color:#d8ffe5;min-height:120px}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:25px}
+button{font:inherit;border:1px solid #1cff78;background:#071b10;color:#baffd0;padding:12px 17px;border-radius:8px;cursor:pointer;transition:.2s}
+button:hover{background:#0c2e19;box-shadow:0 0 22px #00ff7430;transform:translateY(-2px)}
+button.primary{background:#1cff78;color:#031008;font-weight:800}
+#secret{display:none;margin-top:20px;border-left:3px solid #1cff78;padding:14px 16px;background:#07170d;color:#caffd9;line-height:1.7;text-align:left}
+.footer{text-align:center;color:#456c53;font-size:11px;margin-top:25px}
+.matrix{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.07}
+.glitch{animation:glitch 3s infinite}
+@keyframes glitch{0%,90%,100%{transform:none}92%{transform:skewX(-2deg)}94%{transform:translateX(2px)}96%{transform:none}}
+@media(max-width:600px){.content{padding:22px 16px}.boot{font-size:11px}.terminal{padding:13px}h1{letter-spacing:-2px}}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="scan"></div>
+
+<div class="wrap">
+<div class="shell">
+  <div class="top">
+    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+    <span class="titlebar">vipin@birthday-server: ~/friendship</span>
+  </div>
+
+  <div class="content">
+    <div class="boot" id="boot"></div>
+
+    <section class="hero" id="hero">
+      <span class="badge">BIRTHDAY PROTOCOL // ONLINE</span>
+      <h1 class="glitch">HAPPY BIRTHDAY<br>VIPIN 🎂</h1>
+      <div class="sub">Today, production has one critical deployment. You. 🚀</div>
+
+      <div class="terminal">
+        <div class="line"><span class="prompt">$</span> whoami</div>
+        <div class="line"><span class="val">vipin</span> // engineer • friend • certified troublemaker</div>
+
+        <div class="line"><span class="prompt">$</span> cat friendship.txt</div>
+        <div id="message"></div>
+
+        <div class="line"><span class="prompt">$</span> ./birthday --year=2026</div>
+        <div class="line"><span class="key">status:</span> <span class="val">SUCCESS ✓</span></div>
+        <div class="line"><span class="key">bugs:</span> <span class="val">unknown</span> &nbsp; <span class="key">memories:</span> <span class="val">∞</span></div>
+        <div class="line"><span class="key">friendship_uptime:</span> <span class="val">100% (hopefully 😄)</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="deploy()">🚀 Deploy Birthday Surprise</button>
+        <button onclick="sudo()">⌨️ sudo access</button>
+      </div>
+
+      <div id="secret"></div>
+      <div class="footer">Built with 0 frameworks • 0 dependencies • 100% friendship ❤️</div>
+    </section>
+  </div>
+</div>
+</div>
+
+<script>
+const bootLines=[
+"> initializing birthday_protocol...",
+"> connecting to friendship_server...",
+"> authenticating user: VIPIN",
+"> loading memories................ OK",
+"> checking friendship_uptime...... 100%",
+"> compiling good wishes........... SUCCESS",
+"> installing happiness............ SUCCESS",
+"> detecting cake.................. FOUND 🎂",
+"> all systems ready.",
+"",
+"> ACCESS GRANTED."
+];
+const boot=document.getElementById("boot");
+let i=0;
+function typeBoot(){
+ if(i>=bootLines.length){setTimeout(()=>{boot.style.display="none";document.getElementById("hero").style.display="block";typeMessage()},500);return}
+ const line=document.createElement("div");line.textContent=bootLines[i++];boot.appendChild(line);
+ setTimeout(typeBoot,120);
+}
+typeBoot();
+
+const msg=`// Dear Vipin,
+
+Some friendships don't need daily pings,
+constant calls, or a perfectly documented API.
+
+They just work.
+
+Through random conversations, stupid jokes,
+serious talks, unexpected plans and all the
+chaos in between — you've become one of those
+people whose presence simply makes life better.
+
+So today, I'm not sending you a generic
+"Happy Birthday" message.
+
+I'm wishing you a year with fewer bugs,
+more successful deployments,
+zero production incidents,
+unlimited laughter,
+and memories worth keeping forever.
+
+Happy Birthday, bro. ❤️
+May your life always stay in production —
+stable, scalable and full of good surprises. 🚀`;
+
+function typeMessage(){
+ const el=document.getElementById("message");let n=0;
+ function t(){if(n<msg.length){el.textContent+=msg[n++];setTimeout(t,msg[n-1]==="\n"?110:13)}}
+ t();
+}
+
+function deploy(){
+ const s=document.getElementById("secret");
+ s.style.display="block";
+ s.innerHTML=`<span class="prompt">root@birthday-server:~#</span> ./deploy_happiness.sh<br><br>
+<span class="val">Deploying:</span> cake 🎂<br>
+<span class="val">Deploying:</span> laughter 😂<br>
+<span class="val">Deploying:</span> good luck 🍀<br>
+<span class="val">Deploying:</span> unforgettable memories ✨<br><br>
+<span style="color:#1cff78">✓ Deployment successful. Vipin's 2026 build is now LIVE.</span>`;
+confetti();
+}
+
+function sudo(){
+ const s=document.getElementById("secret");
+ s.style.display="block";
+ s.innerHTML=`<span class="prompt">vipin@birthday-server:~$</span> sudo access<br><br>
+Password required: <span class="val">friendship</span><br>
+Authentication successful. 🔓<br><br>
+<span style="color:#1cff78">SECRET: You're officially one of the people I'm genuinely glad life introduced me to.</span>`;
+}
+
+function confetti(){
+ for(let i=0;i<90;i++){
+   const e=document.createElement("div");
+   e.style.position="fixed";e.style.left=Math.random()*100+"vw";e.style.top="-15px";
+   e.style.width="7px";e.style.height="13px";e.style.zIndex=10;
+   e.style.background=`hsl(${Math.random()*360},90%,65%)`;
+   e.style.transform=`rotate(${Math.random()*360}deg)`;
+   e.style.transition=`transform ${2+Math.random()*2}s linear, top ${2+Math.random()*2}s linear`;
+   document.body.appendChild(e);
+   requestAnimationFrame(()=>{e.style.top="110vh";e.style.transform+=` rotate(${500+Math.random()*700}deg)`});
+   setTimeout(()=>e.remove(),4500);
+ }
+}
+
+const c=document.getElementById("matrix"),ctx=c.getContext("2d");
+function resize(){c.width=innerWidth;c.height=innerHeight}resize();addEventListener("resize",resize);
+const chars="01{}[]<>/\\$#@VIPIN";let drops=[];
+function matrix(){ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle="#1cff78";ctx.font="12px monospace";if(drops.length!==Math.ceil(c.width/14))drops=Array(Math.ceil(c.width/14)).fill(0).map(()=>Math.random()*c.height/14);
+drops.forEach((y,x)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],x*14,y*14);drops[x]=y*14>c.height&&Math.random()>.975?0:y+1});requestAnimationFrame(matrix)}
+matrix();
+</script>
+</body>
+</html>
